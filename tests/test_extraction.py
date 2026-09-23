@@ -128,3 +128,42 @@ def test_ocr_status():
         is_ocr_available(),
         bool,
     )
+
+
+@pytest.mark.skipif(
+    not is_ocr_available(),
+    reason="Tesseract OCR is not available",
+)
+def test_image_ocr():
+    from extraction.image import extract_image
+
+    image = Path("/tmp/agreewise_ocr_test.png")
+
+    if not image.exists():
+        pytest.skip("OCR test image is not available.")
+
+    result = extract_image(image)
+
+    assert "AgreeWise OCR Test" in result
+    assert "personal information" in result
+    assert "third-party service providers" in result
+    assert "deletion of your personal data" in result
+
+
+@pytest.mark.skipif(
+    not is_ocr_available(),
+    reason="Tesseract OCR is not available",
+)
+def test_image_ocr_through_router():
+    image = Path("/tmp/agreewise_ocr_test.png")
+
+    if not image.exists():
+        pytest.skip("OCR test image is not available.")
+
+    result = extract_and_normalize(
+        image,
+        "agreewise_ocr_test.png",
+    )
+
+    assert "AgreeWise OCR Test" in result
+    assert "personal information" in result
